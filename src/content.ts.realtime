@@ -1,0 +1,111 @@
+function tryAttachVideo() {
+  const video = document.querySelector("video");
+
+  if (video && video !== currentVideo) {
+    console.log("🎯 video attached");
+    stopTicking();
+    currentVideo = video;
+    attachVideoListeners(video);
+
+    if (!video.paused && !video.ended) {
+      startTicking();
+    }
+    return true;
+  }
+  return false;
+}
+tryAttachVideo();
+
+let currentVideo: HTMLVideoElement | null = null;
+
+let lastTick = 0;
+let ticking = false;
+
+/* ---------- helpers ---------- */
+
+function isAdPlaying(): boolean {
+  return !!document.querySelector(".ad-showing");
+}
+
+function startTicking() {
+  if (ticking) return;
+  ticking = true;
+  lastTick = Date.now();
+  requestAnimationFrame(tick);
+}
+
+function stopTicking() {
+  ticking = false;
+  lastTick = 0;
+}
+
+function addWatchTime(seconds: number) {
+  chrome.runtime.sendMessage({
+    type: "ADD_TIME",
+    seconds
+  });
+}
+
+/* ---------- main tick loop ---------- */
+
+function tick() {
+  if (!ticking) return;
+
+  const video = currentVideo;
+  if (!video) return;
+
+  if (
+    video.paused ||
+    video.ended ||
+    document.visibilityState !== "visible" ||
+    isAdPlaying()
+  ) {
+    lastTick = Date.now();
+    requestAnimationFrame(tick);
+    return;
+  }
+
+  const now = Date.now();
+  const deltaSeconds = (now - lastTick) / 1000;
+  lastTick = now;
+
+  if (deltaSeconds > 0 && deltaSeconds < 1) {
+    addWatchTime(deltaSeconds);
+  }
+
+  requestAnimationFrame(tick);
+}
+
+/* ---------- video attachment ---------- */
+
+function attachVideoListeners(video: HTMLVideoElement) {
+  video.addEventListener("play", startTicking);
+  video.addEventListener("pause", stopTicking);
+  video.addEventListener("ended", stopTicking);
+}
+
+/* ---------- observe YouTube SPA ---------- */
+
+const observer = new MutationObserver(() => {
+  const video = document.querySelector("video");
+  console.log("observer tick, video:", video);
+
+  if (video && video !== currentVideo) {
+    console.log("new video detected");
+    stopTicking();
+    currentVideo = video;
+    attachVideoListeners(video);
+
+    if (!video.paused && !video.ended) {
+      console.log("video already playing → start ticking");
+      startTicking();
+    }
+  }
+});
+
+observer.observe(document, {
+  childList: true,
+  subtree: true
+});
+
+// setInterval(tick, 1000);

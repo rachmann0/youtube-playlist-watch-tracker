@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        width: 200px;
+        padding: 12px;
+      }
+ 
+      #time {
+        font-size: 20px;
+        font-weight: bold;
+      }
+      h3 {
+        margin: 10px 0 0 0;
+      }
+
+      /* Solid border */
+      hr.solid {
+        border-top: 3px solid #bbb;
+      }
+
+      button {
+        margin-top: 10px;
+        width: 100%;
+        padding: 6px;
+        cursor: pointer;
+      }
+      #end-session {
+        margin-top: 6px;
+        background: #e53935;
+        color: white;
+        border: none;
+        padding: 6px;
+        cursor: pointer;
+      }
+      #status {
+        margin-top: 6px;
+        font-size: 12px;
+      }
+
+      .playlist {
+        margin-bottom: 6px;
+        font-size: 13px;
+      }
+      .time {
+        font-weight: bold;
+      }
+
+      .playlist a {
+        color: #1a73e8;
+        text-decoration: none !important;
+      }
+
+      .playlist a:hover {
+        color: #e81aae;
+        /* text-decoration: underline !important; */
+      }
+    </style>
+  </head>
+  <body>
+    <!-- <h1>Total Watch Time</h1>
+    <div id="time">00:00:00</div> -->
+    <h2>Playlist Watch Time</h2>
+
+    <h3>Current Session Watch Time</h3>
+    <div id="playlists"></div>
+
+    <hr class="solid">
+
+    <h3>All-time Watch Time</h3>
+    <div id="all-time"></div>
+
+    <button id="add-playlist">Add current playlist</button>
+    <button id="end-session">End session</button>
+
+
+    <div id="status"></div>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
