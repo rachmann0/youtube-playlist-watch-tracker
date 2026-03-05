@@ -28,12 +28,12 @@ function deletePlaylist(playlistId, playlistName) {
             playlists: [],
             allTimePlaylists: []
         }, data => {
-            renderPlaylists(sessionContainer, data.playlists);
-            renderPlaylists(allTimeContainer, data.allTimePlaylists);
+            renderPlaylists(sessionContainer, data.playlists, false);
+            renderPlaylists(allTimeContainer, data.allTimePlaylists, true);
         });
     });
 }
-function renderPlaylists(container, playlists) {
+function renderPlaylists(container, playlists, isAllTimePlaylist) {
     container.innerHTML = "";
     if (playlists.length === 0) {
         container.textContent = "—";
@@ -59,18 +59,19 @@ function renderPlaylists(container, playlists) {
         const time = document.createElement("div");
         time.className = "time";
         time.textContent = format(p.seconds);
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Delete";
-        deleteBtn.style.marginLeft = "8px";
-        deleteBtn.style.cursor = "pointer";
-        deleteBtn.style.padding = "2px 8px";
-        deleteBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            deletePlaylist(p.id, p.title);
-        });
         div.appendChild(link);
         div.appendChild(time);
-        div.appendChild(deleteBtn);
+        if (isAllTimePlaylist) {
+            const deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "Delete Playlist";
+            deleteBtn.className = "deleteBtn";
+            deleteBtn.style.cursor = "pointer";
+            deleteBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                deletePlaylist(p.id, p.title);
+            });
+            div.appendChild(deleteBtn);
+        }
         container.appendChild(div);
     });
 }
@@ -79,8 +80,8 @@ chrome.storage.local.get({
     playlists: [],
     allTimePlaylists: []
 }, data => {
-    renderPlaylists(sessionContainer, data.playlists);
-    renderPlaylists(allTimeContainer, data.allTimePlaylists);
+    renderPlaylists(sessionContainer, data.playlists, false);
+    renderPlaylists(allTimeContainer, data.allTimePlaylists, true);
 });
 // Live updates
 chrome.runtime.onMessage.addListener(msg => {
@@ -89,8 +90,8 @@ chrome.runtime.onMessage.addListener(msg => {
             playlists: [],
             allTimePlaylists: []
         }, data => {
-            renderPlaylists(sessionContainer, data.playlists);
-            renderPlaylists(allTimeContainer, data.allTimePlaylists);
+            renderPlaylists(sessionContainer, data.playlists, false);
+            renderPlaylists(allTimeContainer, data.allTimePlaylists, true);
         });
     }
 });
@@ -163,8 +164,8 @@ endSessionBtn.addEventListener("click", () => {
             allTimePlaylists: allTime
         }, () => {
             // render(session); // refresh UI
-            renderPlaylists(sessionContainer, session);
-            renderPlaylists(allTimeContainer, allTime);
+            renderPlaylists(sessionContainer, session, false);
+            renderPlaylists(allTimeContainer, allTime, true);
         });
     });
 });
