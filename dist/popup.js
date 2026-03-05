@@ -15,6 +15,24 @@ const allTimeContainer = document.getElementById("all-time");
 function playlistUrl(id) {
     return `https://www.youtube.com/playlist?list=${id}`;
 }
+function deletePlaylist(playlistId) {
+    if (!confirm(`are you sure to delete ${playlistId}`))
+        return;
+    chrome.storage.local.get(["playlists", "allTimePlaylists"]).then(d => {
+        chrome.storage.local.set({
+            playlists: (d.playlists || []).filter((p) => p.id !== playlistId),
+            allTimePlaylists: (d.allTimePlaylists || []).filter((p) => p.id !== playlistId)
+        });
+        // Refresh UI
+        chrome.storage.local.get({
+            playlists: [],
+            allTimePlaylists: []
+        }, data => {
+            renderPlaylists(sessionContainer, data.playlists);
+            renderPlaylists(allTimeContainer, data.allTimePlaylists);
+        });
+    });
+}
 function renderPlaylists(container, playlists) {
     container.innerHTML = "";
     if (playlists.length === 0) {
@@ -41,8 +59,18 @@ function renderPlaylists(container, playlists) {
         const time = document.createElement("div");
         time.className = "time";
         time.textContent = format(p.seconds);
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.style.marginLeft = "8px";
+        deleteBtn.style.cursor = "pointer";
+        deleteBtn.style.padding = "2px 8px";
+        deleteBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            deletePlaylist(p.id);
+        });
         div.appendChild(link);
         div.appendChild(time);
+        div.appendChild(deleteBtn);
         container.appendChild(div);
     });
 }
