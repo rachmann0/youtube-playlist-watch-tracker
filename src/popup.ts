@@ -25,8 +25,8 @@ function playlistUrl(id: string) {
   return `https://www.youtube.com/playlist?list=${id}`;
 }
 
-function deletePlaylist(playlistId: string) {
-  if (!confirm(`are you sure to delete ${playlistId}`)) return;
+function deletePlaylist(playlistId: string, playlistName: string) {
+  if (!confirm(`are you sure to delete ${playlistName}?`)) return;
   chrome.storage.local.get(["playlists", "allTimePlaylists"]).then(d => {
     chrome.storage.local.set({
       playlists: (d.playlists || []).filter((p: Playlist) => p.id !== playlistId),
@@ -89,7 +89,7 @@ function renderPlaylists(
     deleteBtn.style.padding = "2px 8px";
     deleteBtn.addEventListener("click", (e) => {
       e.preventDefault();
-      deletePlaylist(p.id);
+      deletePlaylist(p.id, p.title);
     });
 
     div.appendChild(link);
